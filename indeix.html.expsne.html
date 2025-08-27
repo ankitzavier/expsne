@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Probot Expense Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom scrollbar for a cleaner look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        /* Animation for the probot message */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .probot-message {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800">
+
+    <div class="container mx-auto max-w-2xl p-4 md:p-6">
+        <!-- Header -->
+        <header class="text-center mb-6">
+            <h1 class="text-4xl font-bold text-slate-900">Probot Expenses 🤖</h1>
+            <p class="text-slate-500 mt-1">Your friendly finance buddy.</p>
+        </header>
+
+        <main class="space-y-6">
+            <!-- Probot Message Area -->
+            <div id="probot-container" class="bg-indigo-600 text-white p-4 rounded-xl shadow-lg min-h-[70px] flex items-center justify-center">
+                <p id="probot-message" class="text-center text-lg font-medium">Hey there! Ready to track some spending?</p>
+            </div>
+
+            <!-- Summary Cards -->
+            <section class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="bg-white p-4 rounded-xl shadow-md text-center">
+                    <h3 class="text-sm font-medium text-slate-500">Today</h3>
+                    <p id="total-today" class="text-2xl font-bold text-slate-900 mt-1">₹0</p>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-md text-center">
+                    <h3 class="text-sm font-medium text-slate-500">This Week</h3>
+                    <p id="total-week" class="text-2xl font-bold text-slate-900 mt-1">₹0</p>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-md text-center">
+                    <h3 class="text-sm font-medium text-slate-500">This Month</h3>
+                    <p id="total-month" class="text-2xl font-bold text-slate-900 mt-1">₹0</p>
+                </div>
+            </section>
+
+            <!-- Add Expense Form -->
+            <section class="bg-white p-6 rounded-xl shadow-md">
+                <h2 class="text-xl font-bold mb-4">Add New Expense</h2>
+                <form id="expense-form" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="category" class="block text-sm font-medium text-slate-700">Category</label>
+                            <select id="category" name="category" required class="mt-1 block w-full p-3 bg-slate-50 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="shopping">🛍️ Shopping</option>
+                                <option value="friends">🧑‍🤝‍🧑 Friends</option>
+                                <option value="girlfriend">❤️ Girlfriend</option>
+                                <option value="study">📚 Study</option>
+                                <option value="emi">📄 EMI</option>
+                                <option value="daily">🛒 Daily Use</option>
+                                <option value="food">🍕 Food</option>
+                                <option value="travel">✈️ Travel</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="amount" class="block text-sm font-medium text-slate-700">Amount (₹)</label>
+                            <input type="number" id="amount" name="amount" required placeholder="e.g., 500" class="mt-1 block w-full p-3 bg-slate-50 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="note" class="block text-sm font-medium text-slate-700">Note (Optional)</label>
+                        <input type="text" id="note" name="note" placeholder="Why you spent this" class="mt-1 block w-full p-3 bg-slate-50 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                     <div>
+                        <label for="date" class="block text-sm font-medium text-slate-700">Date</label>
+                        <input type="date" id="date" name="date" required class="mt-1 block w-full p-3 bg-slate-50 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-transform transform hover:scale-105">
+                        Add Expense
+                    </button>
+                </form>
+            </section>
+
+            <!-- History & Filters -->
+            <section class="bg-white p-6 rounded-xl shadow-md">
+                <div class="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
+                    <h2 class="text-xl font-bold">History</h2>
+                    <div class="flex items-center gap-2">
+                         <label for="filter-category" class="text-sm font-medium">Filter:</label>
+                         <select id="filter-category" class="p-2 bg-slate-50 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="all">All Categories</option>
+                            <option value="shopping">🛍️ Shopping</option>
+                            <option value="friends">🧑‍🤝‍🧑 Friends</option>
+                            <option value="girlfriend">❤️ Girlfriend</option>
+                            <option value="study">📚 Study</option>
+                            <option value="emi">📄 EMI</option>
+                            <option value="daily">🛒 Daily Use</option>
+                            <option value="food">🍕 Food</option>
+                            <option value="travel">✈️ Travel</option>
+                         </select>
+                    </div>
+                </div>
+                <div id="expense-list" class="space-y-3 max-h-96 overflow-y-auto pr-2">
+                    <!-- Expenses will be dynamically inserted here -->
+                     <p class="text-center text-slate-500 p-4">No expenses logged yet. Add one above!</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // DOM Elements
+            const expenseForm = document.getElementById('expense-form');
+            const categoryInput = document.getElementById('category');
+            const amountInput = document.getElementById('amount');
+            const noteInput = document.getElementById('note');
+            const dateInput = document.getElementById('date');
+            
+            const expenseList = document.getElementById('expense-list');
+            const filterCategory = document.getElementById('filter-category');
+
+            const totalTodayEl = document.getElementById('total-today');
+            const totalWeekEl = document.getElementById('total-week');
+            const totalMonthEl = document.getElementById('total-month');
+            
+            const probotMessageEl = document.getElementById('probot-message');
+            const probotContainerEl = document.getElementById('probot-container');
+
+            // Set default date to today
+            dateInput.valueAsDate = new Date();
+
+            // App State
+            let expenses = JSON.parse(localStorage.getItem('expenses')) || [];
+
+            // --- Probot Logic ---
+            const probotMessages = {
+                shopping: [
+                    "Whoa, you’re spoiling yourself today! 😎",
+                    "Treat yourself! You deserve it. 🛍️",
+                    "Another shopping spree? Nice!",
+                ],
+                friends: [
+                    "Good times with good friends! 🤙",
+                    "Making memories, one hangout at a time.",
+                    "Hope you had a great time with your pals!",
+                ],
+                girlfriend: [
+                    "Aww, that's sweet! ❤️",
+                    "Happy partner, happy life!",
+                    "Investing in love! ✨",
+                ],
+                study: [
+                    "Brain gains! Investing in yourself. 🧠",
+                    "Knowledge is power! Keep it up.",
+                    "That's a smart expense!",
+                ],
+                emi: [
+                    "Big boss moves, EMI cleared 💪",
+                    "Another one bites the dust. Well done!",
+                    "Responsibility looks good on you!",
+                ],
+                daily: [
+                    "The essentials are covered. 👍",
+                    "Just the usual, keeping things running.",
+                    "Everyday stuff, sorted.",
+                ],
+                food: [
+                    "Fueling up! Hope it was delicious. 😋",
+                    "Bon appétit! What did you have?",
+                    "Yum! Money well spent.",
+                ],
+                travel: [
+                    "Adventure awaits! Where to next? 🗺️",
+                    "Safe travels! Hope you have a blast.",
+                    "Exploring the world, one trip at a time.",
+                ],
+                default: [
+                    "Got it! Logged and loaded.",
+                    "Alright, that's in the books.",
+                    "Expense added successfully!",
+                ]
+            };
+
+            function showProbotMessage(category, amount) {
+                const messages = probotMessages[category] || probotMessages.default;
+                let message = messages[Math.floor(Math.random() * messages.length)];
+
+                // Add a special message for large expenses
+                if (amount > 2000) {
+                    message += " That's a big one!";
+                }
+                
+                probotMessageEl.textContent = message;
+                probotContainerEl.classList.add('probot-message');
+                // Reset animation
+                setTimeout(() => {
+                    probotContainerEl.classList.remove('probot-message');
+                }, 500);
+            }
+
+            // --- Core Functions ---
+            function renderExpenses() {
+                expenseList.innerHTML = '';
+                const filter = filterCategory.value;
+
+                const filteredExpenses = expenses
+                    .filter(exp => filter === 'all' || exp.category === filter)
+                    .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                if (filteredExpenses.length === 0) {
+                    expenseList.innerHTML = `<p class="text-center text-slate-500 p-4">No expenses found for this filter.</p>`;
+                    return;
+                }
+
+                filteredExpenses.forEach(expense => {
+                    const expenseEl = document.createElement('div');
+                    expenseEl.className = 'flex justify-between items-center bg-slate-50 p-3 rounded-lg border border-slate-200';
+                    
+                    const categoryEmoji = categoryInput.querySelector(`option[value="${expense.category}"]`).textContent.split(' ')[0];
+
+                    expenseEl.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">${categoryEmoji}</span>
+                            <div>
+                                <p class="font-semibold capitalize">${expense.category}</p>
+                                <p class="text-sm text-slate-500">${expense.note || new Date(expense.date).toLocaleDateString('en-GB')}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                             <p class="font-bold text-lg text-slate-800">₹${expense.amount.toLocaleString('en-IN')}</p>
+                             <button data-id="${expense.id}" class="delete-btn text-xs text-red-500 hover:text-red-700">Delete</button>
+                        </div>
+                    `;
+                    expenseList.appendChild(expenseEl);
+                });
+            }
+
+            function updateSummaries() {
+                const now = new Date();
+                const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                const startOfWeek = new Date(today);
+                startOfWeek.setDate(today.getDate() - today.getDay());
+                const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+                const totalToday = expenses
+                    .filter(exp => new Date(exp.date) >= today)
+                    .reduce((sum, exp) => sum + exp.amount, 0);
+
+                const totalWeek = expenses
+                    .filter(exp => new Date(exp.date) >= startOfWeek)
+                    .reduce((sum, exp) => sum + exp.amount, 0);
+                
+                const totalMonth = expenses
+                    .filter(exp => new Date(exp.date) >= startOfMonth)
+                    .reduce((sum, exp) => sum + exp.amount, 0);
+
+                totalTodayEl.textContent = `₹${totalToday.toLocaleString('en-IN')}`;
+                totalWeekEl.textContent = `₹${totalWeek.toLocaleString('en-IN')}`;
+                totalMonthEl.textContent = `₹${totalMonth.toLocaleString('en-IN')}`;
+            }
+            
+            function addExpense(e) {
+                e.preventDefault();
+
+                const category = categoryInput.value;
+                const amount = parseFloat(amountInput.value);
+                const note = noteInput.value.trim();
+                const date = dateInput.value;
+
+                if (isNaN(amount) || amount <= 0) {
+                    alert('Please enter a valid amount.');
+                    return;
+                }
+
+                const newExpense = {
+                    id: Date.now(),
+                    category,
+                    amount,
+                    note,
+                    date
+                };
+
+                expenses.push(newExpense);
+                saveExpenses();
+                
+                showProbotMessage(category, amount);
+                updateUI();
+                expenseForm.reset();
+                dateInput.valueAsDate = new Date(); // Reset date to today
+            }
+
+            function deleteExpense(id) {
+                expenses = expenses.filter(exp => exp.id !== id);
+                saveExpenses();
+                updateUI();
+            }
+
+            function saveExpenses() {
+                localStorage.setItem('expenses', JSON.stringify(expenses));
+            }
+            
+            function updateUI() {
+                updateSummaries();
+                renderExpenses();
+            }
+
+            // --- Event Listeners ---
+            expenseForm.addEventListener('submit', addExpense);
+            filterCategory.addEventListener('change', renderExpenses);
+            expenseList.addEventListener('click', (e) => {
+                if (e.target.classList.contains('delete-btn')) {
+                    const id = parseInt(e.target.dataset.id);
+                    deleteExpense(id);
+                }
+            });
+
+            // --- Initial Load ---
+            updateUI();
+        });
+    </script>
+</body>
+</html>
